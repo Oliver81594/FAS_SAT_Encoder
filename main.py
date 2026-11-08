@@ -1,5 +1,6 @@
 import subprocess
 from argparse import ArgumentParser
+from itertools import combinations
 
 def load_instance(input_file_name):
     k, n, m, edges = 0, 0, 0, []
@@ -15,15 +16,15 @@ def load_instance(input_file_name):
 
 def variable_to_id(var, n):
     if var[0] == "P":
-        i, j = map(int, [var[1], var[2]])
-        return i*n + j
-    else:
-        i, j = map(int, [var[2], var[3]])
-        return n**2 + i*n + j
+        i, j = map(int, var[1:].split(","))
+        return i*n + j + 1
+    
+    i, j = map(int, var[2:].split(","))
+    return n**2 + i*n + j + 1
 
 def id_to_variable(id, n):
     prefix = "P"
-
+    id -= 1
     # we are decoding BE_ij
     if id > n**2:
         n -= n**2
@@ -43,16 +44,16 @@ def encode(instance):
     # each node has at least one new position
     for u in range(n):
         clause = []
-        for j in range(n):
-            clause.append(variable_to_id(f"P{u}{i}"))
-        cnf += clause
+        for i in range(n):
+            clause.append(variable_to_id(f"P{u},{i}", n))
+        cnf.append(clause)
 
     # each position has at least one node assigned
     for i in range(n):
         clause = []
         for u in range(n):
-            clause.append(variable_to_id(f"P{u}{i}"))
-        cnf += clause
+            clause.append(variable_to_id(f"P{u},{i}", n))
+        cnf.append(clause)
 
     # each node has at most one new position
     for u in range(n):
@@ -61,8 +62,8 @@ def encode(instance):
             for j in range(n):
                 if i == j:
                     continue
-                clause += [-variable_to_id(f"P{u}{i}"), -variable_to_id(f"P{u}{j}")]
-        cnf += clause
+                clause += [-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{u},{j}", n)]
+        cnf.append(clause)
 
     # each position has at most one node assigned
     for i in range(n):
@@ -71,19 +72,31 @@ def encode(instance):
             for v in range(n):
                 if u == v:
                     continue
-                clause += [-variable_to_id(f"P{u}{i}"), -variable_to_id(f"P{v}{i}")]
-        cnf += clause
+                clause += [-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{v},{i}", n)]
+        cnf.append(clause)
 
 
     # encode the rules for back edges
     for (u, v) in edges:
         for i in range(n):
             for j in range(i):
-                clause = [-variable_to_id(f"P{u}{i}"), -variable_to_id(f"P{v}{j}"), variable_to_id(f"BE{i}{j}")]
-                cnf += clause
+                clause = [-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{v},{j}", n), variable_to_id(f"BE{i},{j}", n)]
+                cnf.append(clause)
 
     # encode "at most k" back edges
-    
+    # at most k === at least one false in every subset of size k+1
+    # generate subsets of size k+1
+    ij = []
+    for i in range(n):
+        for j in range(i):
+            ij.append((i,j))
+    subsets = list(combinations(ij, k+1))
+
+    # add clauses requiring at least one false in each subset
+    for subset in subsets:
+        cnf.append([-variable_to_id(f"BE{i},{j}", n) for (i,j) in subset])
+
+    return cnf
 
 def call_solver(cnf, nr_vars, output_name, solver_name, verbosity):
     # print CNF into formula.cnf in DIMACS format
@@ -135,8 +148,8 @@ if __name__ == "__main__":
     instance = load_instance(args.input)
 
     # encode the problem to create CNF formula
-    cnf, nr_vars = encode(instance)
+    cnf = encode(instance)
 
     # call the SAT solver and get the result
-    result = call_solver(cnf, nr_vars, args.output, args.solver, args.verb)
+    result = call_solver(cnf, args.output, args.solver, args.verb)
 
