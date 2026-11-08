@@ -29,9 +29,6 @@ If the number of backward edges is at most k, we can remove them and thus get a 
 - $P_{i, j}$ 
 	- states that node $i$ is on position $j$
 	- we will define this for all nodes and positions, which gives us $n^2$ variables
-- $E_{i,j}$
-	- this will encode the original edges
-	- states that there is and edge going from node $i$ to node $j$
 - $BE_{i,j}$ 
 	- states that there is a back edge going from node on $i$-th position to node on $j$-th position
 	- exists only for $j < i$, otherwise it would not be a back edge
@@ -48,7 +45,12 @@ For our permutation of nodes to be valid we need:
 
 For our back edges we need:
 - the back edge to exist
-	- $BE_{i, j} \iff$
+	- $\forall (u,v) \in G(E),\ \forall\, 1 \le j < i \le n: P_{u,i} \wedge P_{v,j} \implies BE_{i,j}$ 
+		which in CNF can be written as 
+		$\forall (u,v) \in G(E),\ \forall\, 1 \le j < i \le n: \neg P_{u,i} \vee \neg P_{v,j} \vee BE_{i,j}$
+- there is at most $k$ of them
+	- $\{\bigvee_{(i,j) \in S} \neg BE_{i,j}  | S \subseteq \{(i,j) | 1 \leq j < i \leq n \}, |S|=k+1 \}$
+
 
 Questions:
 - weighted or unweighted graph
