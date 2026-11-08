@@ -13,9 +13,29 @@ def load_instance(input_file_name):
 
     return (k, n, m, edges)
 
+def variable_to_id(var, n):
+    if var[0] == "P":
+        i, j = map(int, [var[1], var[2]])
+        return i*n + j
+    else:
+        i, j = map(int, [var[2], var[3]])
+        return n**2 + i*n + j
+
+def id_to_variable(id, n):
+    prefix = "P"
+
+    # we are decoding BE_ij
+    if id > n**2:
+        n -= n**2
+        prefix = "BE"
+
+    i, j = id // n, id % n
+    return f"{prefix}{i}{j}"
+
 
 def encode(instance):
-    pass
+    (k, n, m, edges) = instance
+    
 
 
 def call_solver(cnf, nr_vars, output_name, solver_name, verbosity):
@@ -72,5 +92,4 @@ if __name__ == "__main__":
 
     # call the SAT solver and get the result
     result = call_solver(cnf, nr_vars, args.output, args.solver, args.verb)
-
 
