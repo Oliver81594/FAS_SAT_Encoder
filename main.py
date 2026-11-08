@@ -35,8 +35,55 @@ def id_to_variable(id, n):
 
 def encode(instance):
     (k, n, m, edges) = instance
-    
 
+    cnf = []
+
+    # encode the rules for permuting nodes
+
+    # each node has at least one new position
+    for u in range(n):
+        clause = []
+        for j in range(n):
+            clause.append(variable_to_id(f"P{u}{i}"))
+        cnf += clause
+
+    # each position has at least one node assigned
+    for i in range(n):
+        clause = []
+        for u in range(n):
+            clause.append(variable_to_id(f"P{u}{i}"))
+        cnf += clause
+
+    # each node has at most one new position
+    for u in range(n):
+        clause = []
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    continue
+                clause += [-variable_to_id(f"P{u}{i}"), -variable_to_id(f"P{u}{j}")]
+        cnf += clause
+
+    # each position has at most one node assigned
+    for i in range(n):
+        clause = []
+        for u in range(n):
+            for v in range(n):
+                if u == v:
+                    continue
+                clause += [-variable_to_id(f"P{u}{i}"), -variable_to_id(f"P{v}{i}")]
+        cnf += clause
+
+
+    # encode the rules for back edges
+    for (u, v) in edges:
+        for i in range(n):
+            for j in range(i):
+                clause = [-variable_to_id(f"P{u}{i}"), -variable_to_id(f"P{v}{j}"), variable_to_id(f"BE{i}{j}")]
+                cnf += clause
+
+    # encode "at most k" back edges
+    
 
 def call_solver(cnf, nr_vars, output_name, solver_name, verbosity):
     # print CNF into formula.cnf in DIMACS format
