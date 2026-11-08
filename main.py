@@ -26,7 +26,7 @@ def id_to_variable(id, n):
     prefix = "P"
     id -= 1
     # we are decoding BE_ij
-    if id > n**2:
+    if id >= n**2:
         id -= n**2
         prefix = "BE"
 
@@ -130,6 +130,15 @@ if __name__ == "__main__":
         ),
     )
     parser.add_argument(
+        "-o",
+        "--output",
+        default="formula.cnf",
+        type=str,
+        help=(
+            "Output file for the DIMACS format (i.e. the CNF formula)."
+        ),
+    )
+    parser.add_argument(
         "-v",
         "--verb",
         default=1,
@@ -143,11 +152,18 @@ if __name__ == "__main__":
 
     # load the input instance
     instance = load_instance(args.input)
+    (k, n, m, edges) = instance
 
-    # encode the problem to create CNF formula
-    cnf = encode(instance)
-
-    print(cnf)
+    # Dump Heuristics
+    # if k > number of edges, we remove all of them = the resulting graph is acyclic
+    if k >= m:
+        print("YES")
+        for edge in edges:
+            print(edge)
+    
+    else:
+        # encode the problem to create CNF formula
+        cnf = encode(instance)
 
     # call the SAT solver and get the result
     #result = call_solver(cnf, args.output, args.solver, args.verb)
