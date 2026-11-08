@@ -27,11 +27,11 @@ def id_to_variable(id, n):
     id -= 1
     # we are decoding BE_ij
     if id > n**2:
-        n -= n**2
+        id -= n**2
         prefix = "BE"
 
     i, j = id // n, id % n
-    return f"{prefix}{i}{j}"
+    return f"{prefix}{i},{j}"
 
 
 def encode(instance):
@@ -57,23 +57,20 @@ def encode(instance):
 
     # each node has at most one new position
     for u in range(n):
-        clause = []
         for i in range(n):
             for j in range(n):
                 if i == j:
                     continue
-                clause += [-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{u},{j}", n)]
-        cnf.append(clause)
+                cnf.append([-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{u},{j}", n)])
+        
 
     # each position has at most one node assigned
     for i in range(n):
-        clause = []
         for u in range(n):
             for v in range(n):
                 if u == v:
                     continue
-                clause += [-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{v},{i}", n)]
-        cnf.append(clause)
+                cnf.append([-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{v},{i}", n)])
 
 
     # encode the rules for back edges
@@ -150,6 +147,8 @@ if __name__ == "__main__":
     # encode the problem to create CNF formula
     cnf = encode(instance)
 
+    print(cnf)
+
     # call the SAT solver and get the result
-    result = call_solver(cnf, args.output, args.solver, args.verb)
+    #result = call_solver(cnf, args.output, args.solver, args.verb)
 
