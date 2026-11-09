@@ -9,7 +9,7 @@ The set of removed edges is called Feedback Arc Set.
 **Input:** 
 - natural number $k$
 - graph $G$
-	- we assume the nodes are numbered from $1$
+	- we assume the nodes are numbered from $0$
 	- lets denote: 
 		- $n = |G(V)|$
 		- $m = |G(E)|$
@@ -32,7 +32,7 @@ If the number of backward edges is at most k, we can remove them and thus get a 
 - $BE_{i,j}$ 
 	- states that there is a back edge going from node on $i$-th position to node on $j$-th position
 	- exists only for $j < i$, otherwise it would not be a back edge
-	- this produces $n^2 - n$ variables
+	- this produces $\frac{n^2 - n}{2}$ variables
 
 ### Rules
 For our permutation of nodes to be valid we need:
@@ -45,11 +45,11 @@ For our permutation of nodes to be valid we need:
 
 For our back edges we need:
 - the back edge to exist
-	- $\forall (u,v) \in G(E),\ \forall\, 1 \le j < i \le n: P_{u,i} \wedge P_{v,j} \implies BE_{i,j}$ 
+	- $\forall (u,v) \in G(E),\ \forall\, 0 \le j < i \lt n: P_{u,i} \wedge P_{v,j} \implies BE_{i,j}$ 
 		which in CNF can be written as 
-		$\forall (u,v) \in G(E),\ \forall\, 1 \le j < i \le n: \neg P_{u,i} \vee \neg P_{v,j} \vee BE_{i,j}$
+		$\forall (u,v) \in G(E),\ \forall\, 0 \le j < i \lt n: \neg P_{u,i} \vee \neg P_{v,j} \vee BE_{i,j}$
 - there is at most $k$ of them
-	- $\{\bigvee_{(i,j) \in S} \neg BE_{i,j}  | S \subseteq \{(i,j) | 1 \leq j < i \leq n \}, |S|=k+1 \}$
+	- $\{\bigvee_{(i,j) \in S} \neg BE_{i,j}  | S \subseteq \{(i,j) | 0 \leq j < i \lt n \}, |S|=k+1 \}$
 
 
 Questions:
@@ -57,3 +57,5 @@ Questions:
 - can k be zero
 - are there loops
 - can we use built in "at most k" rule
+- can I use combinations lib for subsets of size k+1
+
