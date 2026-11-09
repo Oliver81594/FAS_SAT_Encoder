@@ -151,14 +151,16 @@ def decode_model(model, n):
     return removed_edges_original
 
 # Print SAT solver output and statistics
-def print_result(result, n):
+def print_result(result, n, edges):
     # Print the whole output of the SAT solver to stdout
     for line in result.stdout.decode('utf-8').split('\n'):
         print(line)                 
 
     # Check the returned result
     # Returncode for SAT is 10, for UNSAT is 20
+
     if (result.returncode == 20):
+        print("The given problem does not have a solution")
         return
 
     # Parse the model from the output of the solver
@@ -178,10 +180,11 @@ def print_result(result, n):
     
     # Decode the meaning of the assignment
     feedback_arc_set = decode_model(model, n)
-    
-    print("Removed edges: ")
+
+    print("Remove the following edges to get an acyclic graph: ")
     for (u, v) in feedback_arc_set:
-        print(f"{u} -> {v}")
+        if (u, v) in edges:
+            print(f"{u} -> {v}")
 
 # Parse CLI arguments
 def parse_arguments():
@@ -237,16 +240,16 @@ if __name__ == "__main__":
     # Dumb Heuristics
     # If k > number of edges, we remove all of them = the resulting graph is acyclic
     if k >= m:
-        print("YES")
+        print("Remove the following edges to get an acyclic graph: ")
         for edge in edges:
             print(edge)
     
     else:
         # Encode the problem to create CNF formula
         cnf = encode(instance)
-        nr_vars = 2 * n * n
+        nr_vars = max(abs(lit) for clause in cnf for lit in clause)
 
         # Call the SAT solver and get the result
         result = call_solver(cnf, nr_vars, args.output, args.solver, args.verb)
 
-        print_result(result, n)
+        print_result(result, n, edges)
