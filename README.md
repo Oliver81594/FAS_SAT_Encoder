@@ -90,8 +90,20 @@ For our back edges we need:
 - there is at most $k$ of them
 	- $`\{\bigvee_{(i,j) \in S} \neg BE_{i,j}  | S \subseteq \{(i,j) | 0 \leq j < i \lt n \}, |S|=k+1 \}`$
 
+### Example Instances
+For visualising the graphs, I recommend [CS Academy - Graph Editor](https://csacademy.com/app/graph_editor/)
+- `n4m6_square_solvable.in`
+	- $k=1$, $n=4$, $m=6$
+	- Returns solution in less than 1 second
+- `n4m8_square_unsolvable.in`
+	- $k=1$, $n=4$, $m=6$
+	- Flags as unsolvable in less than 1 second
+- `n10m2_nontrivial_time.in`
+	- $k=0$, $n=10$, $m=2$
+	- graph of 10 vertices, 2 creating a cycle and 8 isolated ones
+	- runs around 20s on `AMD Ryzen 5 7640HS with Radeon 760M Graphics`
 
-Questions:
+# Questions
 - are there loops
 - can I use combinations lib for subsets of size k+1
 - paralel edges
