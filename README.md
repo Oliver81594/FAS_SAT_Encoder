@@ -1,7 +1,11 @@
 # Feedback Arc Set - SAT Encoder and Solver
 
-This project is part of Propositional and Predicate Logic (NAIL062) course assesment. 
+This project is part of Propositional and Predicate Logic (NAIL062) course assesment. Goal is to choose a problem, Feedback Arc Set in my case, encode it to CNF feed it to a SAT solver and decode the result back into a human readable format.
 
+The SAT solver used is [Glucose](https://www.labri.fr/perso/lsimon/research/glucose/), more specifically [Glucose 4.2.1](https://github.com/audemard/glucose/releases/tag/4.2.1). There is a compiled version present in the repository. For the best experience it is encouraged to compile your own.
+
+
+# Documentation
 ## Problem Description
 We are given a directed graph, a natural number $k$ and need to answer whether it is possible to remove at most $k$ edges such that the resulting subgraph is acyclic.
 The set of removed edges is called Feedback Arc Set.
@@ -18,14 +22,47 @@ The set of removed edges is called Feedback Arc Set.
 - Feedback Arc Set of size at most $k$ if possible
 - a negative answer if not possible
 
+
+## User documentation
+**Basic usage:** 
+```
+main.py [-h] [-i INPUT] [-o OUTPUT] [-s SOLVER] [-v {0,1}]
+```
+
+**Command-line options:**
+* `-h`, `--help` : Show a help message and exit.
+* `-i INPUT`, `--input INPUT` : The instance file. Default: "input.in".
+* `-o OUTPUT`, `--output OUTPUT` : Output file for the DIMACS format (i.e. the CNF formula).
+* `-s SOLVER`, `--solver SOLVER` : The SAT solver to be used.
+*  `-v {0,1}`, `--verb {0,1}` :  Verbosity of the SAT solver used.
+
+**Input format:**
+The input for this problem has to have the following format in order to work:
+FileName: *Example.in*
+FileContent:
+- **First Line:** nonnegative integer $k$
+- **Second Line:** integers $n$ and $m$ (separated by space) indicating number of vertices and edges respectively
+- **m lines:** each containing two integers, vertices which are connected by an edge
+- **Example:**
+```
+1 
+2 2
+1 2
+2 1
+```
+This is an encoding of a graph with $2$ vertices and $2$ edges, creating a cycle. For this particular problem with $k=1$ the solver should output $True$ and either of the edges - it is enought to remove $1$ edge to destroy the only cycle present.
+
+**Important Note:**  Vertices need to be numbered from $0$ to $n-1$
+
 ## Main Idea
 We take all the vertices, arrange them on a line (as if in topological sort), and get two types of edges:
  - *forward* - going from $i$ to $j$, where $i<j$
  - *backward* - going from $i$ to $j$, where $j<i$
 If the number of backward edges is at most k, we can remove them and thus get a valid topological sort which means that the remaining subgraph is acyclic.
 
-## Encoding
-### Variables
+## Technical Documentation
+### Encoding
+#### Variables
 - $P_{i, j}$ 
 	- states that node $i$ is on position $j$
 	- we will define this for all nodes and positions, which gives us $n^2$ variables
@@ -34,7 +71,7 @@ If the number of backward edges is at most k, we can remove them and thus get a 
 	- exists only for $j < i$, otherwise it would not be a back edge
 	- this produces $\frac{n^2 - n}{2}$ variables
 
-### Rules
+#### Rules
 For our permutation of nodes to be valid we need:
 - every node to have exactly one position
 	- $\{\bigvee_{i \in V(G)} P_{v, i} | \forall v \in V(G)\}$
@@ -53,9 +90,7 @@ For our back edges we need:
 
 
 Questions:
-- weighted or unweighted graph
-- can k be zero
 - are there loops
-- can we use built in "at most k" rule
 - can I use combinations lib for subsets of size k+1
+- paralel edges
 
