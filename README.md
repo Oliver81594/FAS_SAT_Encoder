@@ -122,7 +122,7 @@ Here are the running times and a graph:
 |  5  |      16.52       |
 |  6  |      84.43       |
 
-![A plot of the results](plot.png)
+<img src="plot.png" alt="Alt text" width="350">
 
 Based on the graph we can guess that the running time grows exponentiali with respect to the increasing number of edges to be removed. However, the size of the experiment and methodology were very simple and designed just to sketch the relationship between these variables. A more thorough experiment should be designed for precise and accurate data.
 
