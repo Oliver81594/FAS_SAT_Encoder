@@ -102,6 +102,28 @@ For visualising the graphs, I recommend [CS Academy - Graph Editor](https://csac
 	- $k=0$, $n=10$, $m=2$
 	- graph of 10 vertices, 2 creating a cycle and 8 isolated ones
 	- runs around 20s on `AMD Ryzen 5 7640HS with Radeon 760M Graphics`
+- `n7m42_c7.in`
+	- $n = 7$, $m=42$
+	- a complete graph on 7 vertices
+	- was used to run the experiment
+
+### Running Time Experiment
+The instance used to run the experiment was `n7m42_c7.in` with a varying $k$. I chose this graph due to its simplicity and ease to see how quickly the running time explodes with small changes to $k$. All of the $k$ values measured are unsolvabale in this case but that does not affect the running time in any sense. 
+
+Experiments were run on `AMD Ryzen 5 7640HS with Radeon 760M Graphics` on CachyOS linux distribution. Time was measured using the Glucosse built-in time timer. 
+Here are the running times and a graph:
+
+|  k  | Running Time [s] |
+| :-: | :--------------: |
+|  1  |     0.01250      |
+|  2  |     0.02752      |
+|  3  |      0.2981      |
+|  4  |      2.905       |
+|  5  |      16.52       |
+|  6  |      84.43       |
+![A plot of the results](plot.png)
+
+Based on the graph we can guess that the running time grows exponentiali with respect to the increasing number of edges to be removed. However, the size of the experiment and methodology were very simple and designed just to sketch the relationship between these variables. A more thorough experiment should be designed for precise and accurate data.
 
 # Questions
 - are there loops
