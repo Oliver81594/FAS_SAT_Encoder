@@ -4,7 +4,6 @@ This project is part of Propositional and Predicate Logic (NAIL062) course asses
 
 The SAT solver used is [Glucose](https://www.labri.fr/perso/lsimon/research/glucose/), more specifically [Glucose 4.2.1](https://github.com/audemard/glucose/releases/tag/4.2.1). There is a compiled version present in the repository. For the best experience it is encouraged to compile your own.
 
-
 # Documentation
 ## Problem Description
 We are given a directed graph, a natural number $k$ and need to answer whether it is possible to remove at most $k$ edges such that the resulting subgraph is acyclic.
@@ -38,29 +37,30 @@ main.py [-h] [-i INPUT] [-o OUTPUT] [-s SOLVER] [-v {0,1}]
 
 **Input format:**
 The input for this problem has to have the following format in order to work:
-FileName: *Example.in*
-FileContent:
+**FileName:** *Example.in*
 - **First Line:** nonnegative integer $k$
-- **Second Line:** integers $n$ and $m$ (separated by space) indicating number of vertices and edges respectively
+- **Second Line:** integers $n$ and $m$, separated by whitespace, indicating number of vertices and edges respectively
 - **m lines:** each containing two integers, vertices which are connected by an edge
-- **Example:**
+
+**Example:**
 ```
 1 
 2 2
 1 2
 2 1
 ```
-This is an encoding of a graph with $2$ vertices and $2$ edges, creating a cycle. For this particular problem with $k=1$ the solver should output $True$ and either of the edges - it is enought to remove $1$ edge to destroy the only cycle present.
+This is an encoding of a graph with $2$ vertices and $2$ edges, creating a single cycle. For this particular problem with $k=1$ the solver should output $True$ and either of the edges - it is enought to remove $1$ edge to destroy the only cycle present.
 
 **Important Note:**  Vertices need to be numbered from $0$ to $n-1$
 
-## Main Idea
+## Technical Documentation
+### Main Idea
 We take all the vertices, arrange them on a line (as if in topological sort), and get two types of edges:
  - *forward* - going from $i$ to $j$, where $i<j$
  - *backward* - going from $i$ to $j$, where $j<i$
+ 
 If the number of backward edges is at most k, we can remove them and thus get a valid topological sort which means that the remaining subgraph is acyclic.
 
-## Technical Documentation
 ### Encoding
 #### Variables
 - $P_{i, j}$ 
@@ -74,19 +74,21 @@ If the number of backward edges is at most k, we can remove them and thus get a 
 #### Rules
 For our permutation of nodes to be valid we need:
 - every node to have exactly one position
-	- $\{\bigvee_{i \in V(G)} P_{v, i} | \forall v \in V(G)\}$
-	- $\{\bigwedge_{j, k \in V(G), j\neq k} \neg P_{v,j} \vee \neg P_{v,k}  | \forall v \in V(G)\}$
+	- $`\{\bigvee_{i \in V(G)} P_{v, i} | \forall v \in V(G)\}`$
+	- $`\{\bigwedge_{j, k \in V(G), j\neq k} \neg P_{v,j} \vee \neg P_{v,k}  | \forall v \in V(G)\}`$
 - every position to be occupied by exactly one node
-	- $\{\bigvee_{v \in V(G)} P_{v, i} | \forall i \in V(G)\}$
-	- $\{\bigwedge_{u,v \in V(G), u \neq v} \neg P_{u, i} \vee \neg P_{v, i} | \forall i \in V(G)\}$
+	- $`\{\bigvee_{v \in V(G)} P_{v, i} | \forall i \in V(G)\}`$
+	- $`\{\bigwedge_{u,v \in V(G), u \neq v} \neg P_{u, i} \vee \neg P_{v, i} | \forall i \in V(G)\}`$
 
 For our back edges we need:
 - the back edge to exist
-	- $\forall (u,v) \in G(E),\ \forall\, 0 \le j < i \lt n: P_{u,i} \wedge P_{v,j} \implies BE_{i,j}$ 
+	- $`\forall (u,v) \in G(E),\ \forall\, 0 \le j < i \lt n: P_{u,i} \wedge P_{v,j} \implies BE_{i,j}`$ 
+
 		which in CNF can be written as 
-		$\forall (u,v) \in G(E),\ \forall\, 0 \le j < i \lt n: \neg P_{u,i} \vee \neg P_{v,j} \vee BE_{i,j}$
+		
+		$`\forall (u,v) \in G(E),\ \forall\, 0 \le j < i \lt n: \neg P_{u,i} \vee \neg P_{v,j} \vee BE_{i,j}`$
 - there is at most $k$ of them
-	- $\{\bigvee_{(i,j) \in S} \neg BE_{i,j}  | S \subseteq \{(i,j) | 0 \leq j < i \lt n \}, |S|=k+1 \}$
+	- $`\{\bigvee_{(i,j) \in S} \neg BE_{i,j}  | S \subseteq \{(i,j) | 0 \leq j < i \lt n \}, |S|=k+1 \}`$
 
 
 Questions:
