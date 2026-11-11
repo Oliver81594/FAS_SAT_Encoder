@@ -12,8 +12,8 @@ def load_instance(input_file_name):
         k = int(lines[0].strip())
         n, m = map(int, lines[1].strip().split())
         for i in range(m):
-            i, j = map(int, lines[2+i].strip().split())
-            edges.append((i,j))
+            u, v = map(int, lines[2+i].strip().split())
+            edges.append((u,v))
 
     return (k, n, m, edges)
 
@@ -68,7 +68,7 @@ def encode(instance):
     # Each node has at most one new position
     for u in range(n):
         for i in range(n):
-            for j in range(n):
+            for j in range(i+1, n):
                 if i == j:
                     continue
                 cnf.append([-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{u},{j}", n)])
@@ -76,7 +76,7 @@ def encode(instance):
     # Each position has at most one node assigned
     for i in range(n):
         for u in range(n):
-            for v in range(n):
+            for v in range(i+1, n):
                 if u == v:
                     continue
                 cnf.append([-variable_to_id(f"P{u},{i}", n), -variable_to_id(f"P{v},{i}", n)])
@@ -133,13 +133,13 @@ def decode_model(model, n):
             continue
 
         # Decode the variable from ID
-        var = id_to_variable(m, n)
-        if var[0] == "P":
-            i, j = map(int, var[1:].split(","))
+        variable = id_to_variable(m, n)
+        if variable[0] == "P":
+            i, j = map(int, variable[1:].split(","))
             permutation.append((i,j))
 
         else:
-            u, v = map(int, var[2:].split(","))
+            u, v = map(int, variable[2:].split(","))
             removed_edges_permuted.append((u,v))
 
     # Apply reverse permutation on the edges
@@ -181,10 +181,13 @@ def print_result(result, n, edges):
     # Decode the meaning of the assignment
     feedback_arc_set = decode_model(model, n)
 
-    print("Remove the following edges to get an acyclic graph: ")
-    for (u, v) in feedback_arc_set:
-        if (u, v) in edges:
-            print(f"{u} -> {v}")
+    if len(feedback_arc_set) == 0:
+        print("Graph is already Acyclic")
+    else:
+        print("Remove the following edge(s) to get an acyclic graph: ")
+        for (u, v) in feedback_arc_set:
+            if (u, v) in edges:
+                print(f"{u} -> {v}")
 
 # Parse CLI arguments
 def parse_arguments():
@@ -238,11 +241,14 @@ if __name__ == "__main__":
     (k, n, m, edges) = instance
 
     # Dumb Heuristics
-    # If k > number of edges, we remove all of them = the resulting graph is acyclic
+    # If k >= number of edges, we remove all of them = the resulting graph is acyclic
     if k >= m:
-        print("Remove the following edges to get an acyclic graph: ")
-        for edge in edges:
-            print(edge)
+        if m == 0:
+            print("The graph is already Acyclic")
+        else:
+            print("Remove the following edge(s) to get an acyclic graph: ")
+            for (u, v) in edges:
+                print(f"{u} -> {v}")
     
     else:
         # Encode the problem to create CNF formula
@@ -253,3 +259,4 @@ if __name__ == "__main__":
         result = call_solver(cnf, nr_vars, args.output, args.solver, args.verb)
 
         print_result(result, n, edges)
+
